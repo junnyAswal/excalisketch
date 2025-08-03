@@ -3,12 +3,13 @@
 import getStroke from "perfect-freehand";
 import { getSvgPathFromStroke } from "@/lib/utils/svg";
 import { useState } from "react";
-import * as React from "react";
+// import * as React from "react";
 
 type Point = [x: number, y: number];
 
 export function Whiteboard() {
     const [points, setPoints] = useState<Point[]>([]);
+    const [strokes, setStrokes] = useState<number[][][]>([]);
 
     function handlePointerDown(e: React.PointerEvent) {
         e.currentTarget.setPointerCapture(e.pointerId);
@@ -20,18 +21,24 @@ export function Whiteboard() {
         setPoints([...points, [e.pageX, e.pageY]]);
     }
 
-    // function handlePointerUp(e: MouseEvent) {}
-
-    const stroke = getStroke(points);
-    const pathData = getSvgPathFromStroke(stroke);
+    function handlePointerUp(e: React.PointerEvent) {
+        const stroke = getStroke(points);
+        setStrokes([...strokes, stroke]);
+    }
 
     return (
         <svg
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
             // style={{ touchAction: "none" }}
         >
-            {points && <path d={pathData} />}
+            {strokes.map((stroke, i) => {
+                const pathData = getSvgPathFromStroke(stroke);
+                return points && <path d={pathData} key={i} />;
+            })}
+
+            {<path d={getSvgPathFromStroke(getStroke(points))} />}
         </svg>
     );
 }
