@@ -2,7 +2,7 @@
 
 import getStroke from "perfect-freehand";
 import { getSvgPathFromStroke } from "@/lib/utils/svg";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Toolbar } from "./Toolbar";
 import { Point, Strokes, Tool } from "@/types";
 
@@ -24,13 +24,14 @@ export function Whiteboard() {
     function handlePointerUp(e: React.PointerEvent) {
         // for shape handling
         // const endPoint: Point = [e.pageX, e.pageY]
-        // setPoints([...points, [e.pageX, e.pageY]]);
-        const finalPoints = [...points, [e.pageX, e.pageY]];
+        setPoints([...points, [e.pageX, e.pageY]]);
 
         if (activeTool === "pen") {
-            const stroke = getStroke(finalPoints);
+            const stroke = getStroke(points);
             setStrokes([...strokes, stroke]);
         }
+
+        setPoints([]);
     }
 
     return (
