@@ -25,9 +25,10 @@ export function Whiteboard() {
         // for shape handling
         // const endPoint: Point = [e.pageX, e.pageY]
         // setPoints([...points, [e.pageX, e.pageY]]);
+        const finalPoints = [...points, [e.pageX, e.pageY]];
 
         if (activeTool === "pen") {
-            const stroke = getStroke(points);
+            const stroke = getStroke(finalPoints);
             setStrokes([...strokes, stroke]);
         }
     }
