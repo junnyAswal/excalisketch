@@ -24,7 +24,7 @@ export function Whiteboard() {
     function handlePointerUp(e: React.PointerEvent) {
         // for shape handling
         // const endPoint: Point = [e.pageX, e.pageY]
-        setPoints([...points, [e.pageX, e.pageY]]);
+        // setPoints([...points, [e.pageX, e.pageY]]);
 
         if (activeTool === "pen") {
             const stroke = getStroke(points);
