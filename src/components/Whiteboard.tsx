@@ -3,13 +3,13 @@
 import getStroke from "perfect-freehand";
 import { getSvgPathFromStroke } from "@/lib/utils/svg";
 import { useState } from "react";
-// import * as React from "react";
-
-type Point = [x: number, y: number];
+import { Toolbar } from "./Toolbar";
+import { Point, Strokes, Tool } from "@/types";
 
 export function Whiteboard() {
     const [points, setPoints] = useState<Point[]>([]);
-    const [strokes, setStrokes] = useState<number[][][]>([]);
+    const [strokes, setStrokes] = useState<Strokes>([]);
+    const [activeTool, setActiveTool] = useState<Tool>("pen");
 
     function handlePointerDown(e: React.PointerEvent) {
         e.currentTarget.setPointerCapture(e.pointerId);
@@ -22,23 +22,38 @@ export function Whiteboard() {
     }
 
     function handlePointerUp(e: React.PointerEvent) {
-        const stroke = getStroke(points);
-        setStrokes([...strokes, stroke]);
+        setPoints([...points, [e.pageX, e.pageY]]);
+
+        if (activeTool === "pen") {
+            const stroke = getStroke(points);
+            setStrokes([...strokes, stroke]);
+        }
+
+        // reset points? dont think needed bc only added if pointer is clicked while moving
     }
 
     return (
-        <svg
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            // style={{ touchAction: "none" }}
-        >
-            {strokes.map((stroke, i) => {
-                const pathData = getSvgPathFromStroke(stroke);
-                return points && <path d={pathData} key={i} />;
-            })}
+        <div className='relative h-screen'>
+            <div className='absolute left-1/2 transform translate-y-1/2'>
+                <Toolbar
+                    activeTool={activeTool}
+                    setActiveTool={setActiveTool}
+                />
+            </div>
 
-            {<path d={getSvgPathFromStroke(getStroke(points))} />}
-        </svg>
+            <svg
+                className='w-full h-full bg-white'
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+            >
+                {strokes.map((stroke, i) => {
+                    const pathData = getSvgPathFromStroke(stroke);
+                    return points && <path d={pathData} key={i} />;
+                })}
+
+                {<path d={getSvgPathFromStroke(getStroke(points))} />}
+            </svg>
+        </div>
     );
 }
