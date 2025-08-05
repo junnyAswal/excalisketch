@@ -24,6 +24,7 @@ export function Whiteboard() {
     function handlePointerUp(e: React.PointerEvent) {
         // for shape handling
         // const endPoint: Point = [e.pageX, e.pageY]
+        setPoints([...points, [e.pageX, e.pageY]]);
 
         if (activeTool === "pen") {
             const stroke = getStroke(points);
@@ -48,7 +49,7 @@ export function Whiteboard() {
             >
                 {strokes.map((stroke, i) => {
                     const pathData = getSvgPathFromStroke(stroke);
-                    return points && <path d={pathData} key={i} />;
+                    return <path d={pathData} key={i} />;
                 })}
 
                 {<path d={getSvgPathFromStroke(getStroke(points))} />}
