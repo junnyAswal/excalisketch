@@ -2,7 +2,7 @@
 
 import getStroke from "perfect-freehand";
 import { getSvgPathFromStroke } from "@/lib/utils/svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toolbar } from "./Toolbar";
 import { Point, Strokes, Tool } from "@/types";
 
@@ -22,14 +22,13 @@ export function Whiteboard() {
     }
 
     function handlePointerUp(e: React.PointerEvent) {
-        setPoints([...points, [e.pageX, e.pageY]]);
+        // for shape handling
+        // const endPoint: Point = [e.pageX, e.pageY]
 
         if (activeTool === "pen") {
             const stroke = getStroke(points);
             setStrokes([...strokes, stroke]);
         }
-
-        // reset points? dont think needed bc only added if pointer is clicked while moving
     }
 
     return (
