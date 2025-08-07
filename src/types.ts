@@ -2,7 +2,16 @@ export type Point = [number, number];
 
 export type Strokes = number[][][];
 
-export type Tool = "pen";
+export type Tool = "pen" | "rectangle";
+
+export type Rectangle = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+};
+
+export type Shape = Rectangle;
 
 export interface WhiteboardProps {
     activeTool: Tool;
