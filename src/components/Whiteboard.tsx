@@ -66,8 +66,9 @@ export function Whiteboard() {
     }
 
     return (
-        <div className='relative h-screen'>
-            <div className='absolute right-1/2 transform translate-x-1/2 translate-y-1/2'>
+        <div className='relative h-dvh'>
+            {/* <div className='absolute right-1/2 transform translate-x-1/2 translate-y-1/2'> */}
+            <div className='absolute bottom-4 right-1/2 transform translate-x-1/2'>
                 <Toolbar
                     activeTool={activeTool}
                     setActiveTool={setActiveTool}
