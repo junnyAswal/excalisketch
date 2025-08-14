@@ -4,7 +4,7 @@ import getStroke from "perfect-freehand";
 import { getSvgPathFromStroke } from "@/lib/utils/svg";
 import { useRef, useState } from "react";
 import { Toolbar } from "./Toolbar";
-import { Point, Rectangle, Shape, Strokes, Tool } from "@/types";
+import { Point, Shape, Strokes, Tool } from "@/types";
 import {
     createRectangle,
     updateDynamicRectangle,
@@ -19,27 +19,27 @@ export function Whiteboard() {
 
     function handlePointerDown(e: React.PointerEvent) {
         e.currentTarget.setPointerCapture(e.pointerId);
-        setPoints([[e.pageX, e.pageY]]);
+        setPoints([[e.clientX, e.clientY]]);
     }
 
     function handlePointerMove(e: React.PointerEvent) {
         if (e.buttons !== 1) return;
-        setPoints([...points, [e.pageX, e.pageY]]);
+        setPoints([...points, [e.clientX, e.clientY]]);
 
         if (activeTool === "rectangle") {
             if (dynamicRectRef.current) {
                 updateDynamicRectangle(
                     dynamicRectRef,
                     points,
-                    e.pageX,
-                    e.pageY
+                    e.clientX,
+                    e.clientY
                 );
             }
         }
     }
 
     function handlePointerUp(e: React.PointerEvent) {
-        const newPoints: Point[] = [...points, [e.pageX, e.pageY]];
+        const newPoints: Point[] = [...points, [e.clientX, e.clientY]];
         setPoints(newPoints);
 
         switch (activeTool) {
@@ -52,12 +52,12 @@ export function Whiteboard() {
                     updateDynamicRectangle(
                         dynamicRectRef,
                         points,
-                        e.pageX,
-                        e.pageY
+                        e.clientX,
+                        e.clientY
                     );
                 }
 
-                const rect = createRectangle(points, e.pageX, e.pageY);
+                const rect = createRectangle(points, e.clientX, e.clientY);
 
                 setShapes([...shapes, rect]);
                 break;
@@ -66,9 +66,8 @@ export function Whiteboard() {
     }
 
     return (
-        <div className='relative h-dvh'>
-            {/* <div className='absolute right-1/2 transform translate-x-1/2 translate-y-1/2'> */}
-            <div className='absolute bottom-4 right-1/2 transform translate-x-1/2'>
+        <div className='relative h-dvh touch-none'>
+            <div className='absolute bottom-4 md:top-4 right-1/2 transform translate-x-1/2'>
                 <Toolbar
                     activeTool={activeTool}
                     setActiveTool={setActiveTool}
