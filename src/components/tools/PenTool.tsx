@@ -1,9 +1,9 @@
 "use client";
 
-import { WhiteboardProps } from "@/types";
+import { ToolProps } from "@/types";
 import { Pen } from "lucide-react";
 
-export function PenTool({ activeTool, setActiveTool }: WhiteboardProps) {
+export function PenTool({ activeTool, setActiveTool }: ToolProps) {
     function handleClick() {
         setActiveTool("pen");
     }
