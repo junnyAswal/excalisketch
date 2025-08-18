@@ -4,7 +4,8 @@ import getStroke from "perfect-freehand";
 import { getSvgPathFromStroke } from "@/lib/utils/svg";
 import { useRef, useState } from "react";
 import { Toolbar } from "./Toolbar";
-import { Point, Shape, Strokes, Tool } from "@/types";
+import { StylePanel } from "./StylePanel";
+import { Point, Shape, Sketch, StrokeWidth, Style, Tool } from "@/types";
 import {
     createRectangle,
     updateDynamicRectangle,
@@ -12,9 +13,17 @@ import {
 
 export function Whiteboard() {
     const [points, setPoints] = useState<Point[]>([]);
-    const [strokes, setStrokes] = useState<Strokes>([]);
+    const [sketches, setSketches] = useState<Sketch[]>([]);
     const [shapes, setShapes] = useState<Shape[]>([]);
     const [activeTool, setActiveTool] = useState<Tool>("pen");
+    const [styleSettings, setStyleSettings] = useState<Style>({
+        strokeColour: "#000000",
+        strokeWidth: StrokeWidth.MEDIUM,
+        opacity: 1,
+        rounded: true,
+        fillColour: "none",
+    });
+
     const dynamicRectRef = useRef<SVGRectElement>(null);
 
     function handlePointerDown(e: React.PointerEvent) {
@@ -32,7 +41,8 @@ export function Whiteboard() {
                     dynamicRectRef,
                     points,
                     e.clientX,
-                    e.clientY
+                    e.clientY,
+                    styleSettings
                 );
             }
         }
@@ -44,8 +54,13 @@ export function Whiteboard() {
 
         switch (activeTool) {
             case "pen":
-                const stroke = getStroke(newPoints);
-                setStrokes([...strokes, stroke]);
+                const stroke = getStroke(newPoints, {
+                    size: styleSettings.strokeWidth,
+                });
+                setSketches([
+                    ...sketches,
+                    { strokes: [stroke], colour: styleSettings.strokeColour },
+                ]);
                 break;
             case "rectangle":
                 if (dynamicRectRef.current) {
@@ -53,11 +68,17 @@ export function Whiteboard() {
                         dynamicRectRef,
                         points,
                         e.clientX,
-                        e.clientY
+                        e.clientY,
+                        styleSettings
                     );
                 }
 
-                const rect = createRectangle(points, e.clientX, e.clientY);
+                const rect = createRectangle(
+                    points,
+                    e.clientX,
+                    e.clientY,
+                    styleSettings
+                );
 
                 setShapes([...shapes, rect]);
                 break;
@@ -74,16 +95,33 @@ export function Whiteboard() {
                 />
             </div>
 
+            <div className='absolute right-8 top-1/2 transform -translate-y-40'>
+                <StylePanel
+                    activeTool={activeTool}
+                    styleSettings={styleSettings}
+                    setStyleSettings={setStyleSettings}
+                />
+            </div>
+
             <svg
                 className='w-full h-full bg-white'
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
             >
-                {strokes.map((stroke, i) => {
-                    const pathData = getSvgPathFromStroke(stroke);
-                    return <path d={pathData} key={i} />;
-                })}
+                {sketches.flatMap((sketch, sketchIndex) =>
+                    sketch.strokes.map((stroke, strokeIndex) => {
+                        const pathData = getSvgPathFromStroke(stroke);
+
+                        return (
+                            <path
+                                d={pathData}
+                                key={`${sketchIndex}-${strokeIndex}`}
+                                fill={sketch.colour}
+                            />
+                        );
+                    })
+                )}
 
                 {shapes.map((shape, i) => {
                     // type check when adding more shapes
@@ -94,17 +132,24 @@ export function Whiteboard() {
                             height={shape.height}
                             x={shape.x}
                             y={shape.y}
-                            rx={20}
-                            ry={20}
-                            fill='none'
-                            stroke='black'
-                            strokeWidth={10}
+                            rx={shape.radius}
+                            ry={shape.radius}
+                            fill={shape.fillColour}
+                            stroke={shape.strokeColour}
+                            strokeWidth={shape.strokeWidth}
                         ></rect>
                     );
                 })}
 
                 {activeTool === "pen" && (
-                    <path d={getSvgPathFromStroke(getStroke(points))} />
+                    <path
+                        d={getSvgPathFromStroke(
+                            getStroke(points, {
+                                size: styleSettings.strokeWidth,
+                            })
+                        )}
+                        fill={styleSettings.strokeColour}
+                    />
                 )}
 
                 {activeTool === "rectangle" && (
