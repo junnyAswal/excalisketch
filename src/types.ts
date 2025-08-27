@@ -7,6 +7,7 @@ export type Tool = "pen" | "rectangle";
 export type Sketch = {
     strokes: Strokes;
     colour: string;
+    opacity: number;
 };
 
 export type Rectangle = {
@@ -18,6 +19,7 @@ export type Rectangle = {
     fillColour: string;
     radius: number;
     strokeWidth: StrokeWidth;
+    opacity: number;
 };
 
 export type Style = {
