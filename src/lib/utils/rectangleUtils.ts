@@ -28,6 +28,7 @@ export function updateDynamicRectangle(
     ref.current.setAttribute("ry", `${radius}`);
     ref.current.setAttribute("fill", styleSettings.fillColour);
     ref.current.style.strokeWidth = `${styleSettings.strokeWidth}`;
+    ref.current.style.opacity = `${styleSettings.opacity}`;
 }
 
 export function createRectangle(
@@ -52,5 +53,6 @@ export function createRectangle(
         strokeWidth: styleSettings.strokeWidth,
         strokeColour: styleSettings.strokeColour,
         fillColour: styleSettings.fillColour,
+        opacity: styleSettings.opacity,
     };
 }
