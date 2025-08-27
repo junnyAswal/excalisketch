@@ -10,8 +10,10 @@ import {
     createRectangle,
     updateDynamicRectangle,
 } from "@/lib/utils/rectangleUtils";
+import { MobileStylePanel } from "./MobileStylePanel";
 
 export function Whiteboard() {
+    const [isDrawing, setIsDrawing] = useState(false);
     const [points, setPoints] = useState<Point[]>([]);
     const [sketches, setSketches] = useState<Sketch[]>([]);
     const [shapes, setShapes] = useState<Shape[]>([]);
@@ -27,6 +29,7 @@ export function Whiteboard() {
     const dynamicRectRef = useRef<SVGRectElement>(null);
 
     function handlePointerDown(e: React.PointerEvent) {
+        setIsDrawing(true);
         e.currentTarget.setPointerCapture(e.pointerId);
         setPoints([[e.clientX, e.clientY]]);
     }
@@ -49,6 +52,7 @@ export function Whiteboard() {
     }
 
     function handlePointerUp(e: React.PointerEvent) {
+        setIsDrawing(false);
         const newPoints: Point[] = [...points, [e.clientX, e.clientY]];
         setPoints(newPoints);
 
@@ -59,7 +63,11 @@ export function Whiteboard() {
                 });
                 setSketches([
                     ...sketches,
-                    { strokes: [stroke], colour: styleSettings.strokeColour },
+                    {
+                        strokes: [stroke],
+                        colour: styleSettings.strokeColour,
+                        opacity: styleSettings.opacity,
+                    },
                 ]);
                 break;
             case "rectangle":
@@ -88,14 +96,22 @@ export function Whiteboard() {
 
     return (
         <div className='relative h-dvh touch-none'>
-            <div className='absolute bottom-4 md:top-4 right-1/2 transform translate-x-1/2'>
-                <Toolbar
-                    activeTool={activeTool}
-                    setActiveTool={setActiveTool}
-                />
+            <div className='absolute bottom-4 md:top-4 right-1/2 transform translate-x-1/2 pointer-events-none'>
+                <div className='flex items-center gap-4'>
+                    <Toolbar
+                        activeTool={activeTool}
+                        setActiveTool={setActiveTool}
+                    />
+
+                    <MobileStylePanel
+                        activeTool={activeTool}
+                        styleSettings={styleSettings}
+                        setStyleSettings={setStyleSettings}
+                    />
+                </div>
             </div>
 
-            <div className='absolute right-8 top-1/2 transform -translate-y-40'>
+            <div className='hidden md:block absolute right-8 top-1/2 transform -translate-y-70'>
                 <StylePanel
                     activeTool={activeTool}
                     styleSettings={styleSettings}
@@ -118,6 +134,7 @@ export function Whiteboard() {
                                 d={pathData}
                                 key={`${sketchIndex}-${strokeIndex}`}
                                 fill={sketch.colour}
+                                opacity={sketch.opacity}
                             />
                         );
                     })
@@ -137,6 +154,7 @@ export function Whiteboard() {
                             fill={shape.fillColour}
                             stroke={shape.strokeColour}
                             strokeWidth={shape.strokeWidth}
+                            opacity={shape.opacity}
                         ></rect>
                     );
                 })}
@@ -149,10 +167,11 @@ export function Whiteboard() {
                             })
                         )}
                         fill={styleSettings.strokeColour}
+                        opacity={styleSettings.opacity}
                     />
                 )}
 
-                {activeTool === "rectangle" && (
+                {activeTool === "rectangle" && isDrawing && (
                     <rect ref={dynamicRectRef}></rect>
                 )}
             </svg>
