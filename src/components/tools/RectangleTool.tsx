@@ -1,9 +1,9 @@
 "use client";
 
-import { WhiteboardProps } from "@/types";
+import { ToolProps } from "@/types";
 import { Square } from "lucide-react";
 
-export function RectangleTool({ activeTool, setActiveTool }: WhiteboardProps) {
+export function RectangleTool({ activeTool, setActiveTool }: ToolProps) {
     function handleClick() {
         setActiveTool("rectangle");
     }
