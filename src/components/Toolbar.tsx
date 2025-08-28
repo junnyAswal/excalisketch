@@ -11,7 +11,7 @@ interface ToolbarProps {
 
 export function Toolbar({ activeTool, setActiveTool }: ToolbarProps) {
     return (
-        <div className='flex gap-1.5 bg-gray-50 rounded-lg p-2 shadow-lg pointer-events-auto'>
+        <div className='flex gap-1.5 bg-gray-50 rounded-lg p-2 shadow-lg pointer-events-auto [&>*]:cursor-pointer'>
             <PenTool activeTool={activeTool} setActiveTool={setActiveTool} />
             <RectangleTool
                 activeTool={activeTool}
