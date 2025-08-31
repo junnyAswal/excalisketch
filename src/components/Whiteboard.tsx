@@ -5,18 +5,26 @@ import { getSvgPathFromStroke } from "@/lib/utils/svg";
 import { useRef, useState } from "react";
 import { Toolbar } from "./Toolbar";
 import { StylePanel } from "./StylePanel";
-import { Point, Shape, Sketch, StrokeWidth, Style, Tool } from "@/types";
+import {
+    Element,
+    Point,
+    Shape,
+    Sketch,
+    StrokeWidth,
+    Style,
+    Tool,
+} from "@/types";
 import {
     createRectangle,
     updateDynamicRectangle,
 } from "@/lib/utils/rectangleUtils";
 import { MobileStylePanel } from "./MobileStylePanel";
+import { UndoRedo } from "./UndoRedo";
+import { isRectangle, isSketch } from "@/lib/utils/typeGuards";
 
 export function Whiteboard() {
     const [isDrawing, setIsDrawing] = useState(false);
     const [points, setPoints] = useState<Point[]>([]);
-    const [sketches, setSketches] = useState<Sketch[]>([]);
-    const [shapes, setShapes] = useState<Shape[]>([]);
     const [activeTool, setActiveTool] = useState<Tool>("pen");
     const [styleSettings, setStyleSettings] = useState<Style>({
         strokeColour: "#000000",
@@ -25,6 +33,10 @@ export function Whiteboard() {
         rounded: true,
         fillColour: "none",
     });
+
+    const [elements, setElements] = useState<Element[]>([]);
+    const [undoStack, setUndoStack] = useState<Element[][]>([]);
+    const [redoStack, setRedoStack] = useState<Element[][]>([]);
 
     const dynamicRectRef = useRef<SVGRectElement>(null);
 
@@ -56,19 +68,25 @@ export function Whiteboard() {
         const newPoints: Point[] = [...points, [e.clientX, e.clientY]];
         setPoints(newPoints);
 
+        // currently outside of tools because all tools change elements
+        setUndoStack([...undoStack, elements]);
+        setRedoStack([]);
+
         switch (activeTool) {
             case "pen":
                 const stroke = getStroke(newPoints, {
                     size: styleSettings.strokeWidth,
                 });
-                setSketches([
-                    ...sketches,
+
+                setElements([
+                    ...elements,
                     {
                         strokes: [stroke],
                         colour: styleSettings.strokeColour,
                         opacity: styleSettings.opacity,
                     },
                 ]);
+
                 break;
             case "rectangle":
                 if (dynamicRectRef.current) {
@@ -88,10 +106,30 @@ export function Whiteboard() {
                     styleSettings
                 );
 
-                setShapes([...shapes, rect]);
+                setElements([...elements, rect]);
                 break;
         }
         setPoints([]);
+    }
+
+    function undo() {
+        if (undoStack.length > 0) {
+            setRedoStack([...redoStack, elements]);
+
+            const prevElements = undoStack[undoStack.length - 1];
+            setElements(prevElements);
+            setUndoStack(undoStack.slice(0, -1));
+        }
+    }
+
+    function redo() {
+        if (redoStack.length > 0) {
+            setUndoStack([...undoStack, elements]);
+
+            const prevElements = redoStack[redoStack.length - 1];
+            setElements(prevElements);
+            setRedoStack(redoStack.slice(0, -1));
+        }
     }
 
     return (
@@ -119,44 +157,52 @@ export function Whiteboard() {
                 />
             </div>
 
+            <div className='absolute md:bottom-8 left-12'>
+                <UndoRedo
+                    undo={undo}
+                    redo={redo}
+                    canUndo={undoStack.length > 0}
+                    canRedo={redoStack.length > 0}
+                />
+            </div>
+
             <svg
                 className='w-full h-full bg-white'
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
             >
-                {sketches.flatMap((sketch, sketchIndex) =>
-                    sketch.strokes.map((stroke, strokeIndex) => {
-                        const pathData = getSvgPathFromStroke(stroke);
+                {elements.map((element, elementIndex) => {
+                    if (isSketch(element)) {
+                        return element.strokes.map((stroke, strokeIndex) => {
+                            const pathData = getSvgPathFromStroke(stroke);
 
+                            return (
+                                <path
+                                    d={pathData}
+                                    key={`${elementIndex}-${strokeIndex}`}
+                                    fill={element.colour}
+                                    opacity={element.opacity}
+                                />
+                            );
+                        });
+                    } else if (isRectangle(element)) {
                         return (
-                            <path
-                                d={pathData}
-                                key={`${sketchIndex}-${strokeIndex}`}
-                                fill={sketch.colour}
-                                opacity={sketch.opacity}
-                            />
+                            <rect
+                                key={elementIndex}
+                                width={element.width}
+                                height={element.height}
+                                x={element.x}
+                                y={element.y}
+                                rx={element.radius}
+                                ry={element.radius}
+                                fill={element.fillColour}
+                                stroke={element.strokeColour}
+                                strokeWidth={element.strokeWidth}
+                                opacity={element.opacity}
+                            ></rect>
                         );
-                    })
-                )}
-
-                {shapes.map((shape, i) => {
-                    // type check when adding more shapes
-                    return (
-                        <rect
-                            key={i}
-                            width={shape.width}
-                            height={shape.height}
-                            x={shape.x}
-                            y={shape.y}
-                            rx={shape.radius}
-                            ry={shape.radius}
-                            fill={shape.fillColour}
-                            stroke={shape.strokeColour}
-                            strokeWidth={shape.strokeWidth}
-                            opacity={shape.opacity}
-                        ></rect>
-                    );
+                    }
                 })}
 
                 {activeTool === "pen" && (
