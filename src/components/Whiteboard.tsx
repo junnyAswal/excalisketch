@@ -157,7 +157,7 @@ export function Whiteboard() {
                 />
             </div>
 
-            <div className='absolute top-6 md:top-auto md:bottom-8 left-4 md:left-12'>
+            <div className='absolute top-6 md:top-auto md:bottom-8 left-6 md:left-8'>
                 <UndoRedo
                     undo={undo}
                     redo={redo}
