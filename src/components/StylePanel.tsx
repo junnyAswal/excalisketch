@@ -109,12 +109,12 @@ export function StylePanel({
                 <p>Custom: </p>
                 <input
                     type='color'
-                    className='w-21 h-6 hover:scale-125'
+                    className='w-21 h-6 hover:scale-125 cursor-pointer'
                     onChange={(e) => handleStrokeColour(e.target.value)}
                 />
             </div>
             <hr className='border-gray-200' />
-            <div className='grid grid-cols-3 [&>*]:w-10 [&>*]:h-10 [&>*]:hover:bg-gray-200 [&>*]:font-bold [&>*]:rounded-lg place-items-center'>
+            <div className='grid grid-cols-3 [&>*]:w-10 [&>*]:h-10 [&>*]:hover:bg-gray-200 [&>*]:font-bold [&>*]:rounded-lg place-items-center [&>*]:cursor-pointer'>
                 {width.map((o, i) => {
                     return (
                         <button

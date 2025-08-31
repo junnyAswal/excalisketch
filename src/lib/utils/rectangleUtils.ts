@@ -45,6 +45,7 @@ export function createRectangle(
     const radius = styleSettings.rounded ? 10 : 0;
 
     return {
+        shape: "rectangle",
         x: x,
         y: y,
         width: width,

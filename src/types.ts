@@ -4,6 +4,8 @@ export type Strokes = number[][][];
 
 export type Tool = "pen" | "rectangle";
 
+export type Element = Sketch | Shape;
+
 export type Sketch = {
     strokes: Strokes;
     colour: string;
@@ -11,6 +13,7 @@ export type Sketch = {
 };
 
 export type Rectangle = {
+    shape: string;
     x: number;
     y: number;
     width: number;
